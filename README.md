@@ -56,6 +56,13 @@ http.max_redirects = 5
 response = http.get some_url
 ```
 
+And you can suppress redirects.
+
+```ruby
+http.redirect = false
+response = http.get some_url
+```
+
 Url doesn't have scheme? `http_wrapper` prefixes url with `http://` if scheme is missing.
 
 ```ruby

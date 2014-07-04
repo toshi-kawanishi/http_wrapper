@@ -1,9 +1,9 @@
 require 'net/https'
 
 class HTTPWrapper
-  KNOWN_OPTIONS_KEYS = [:timeout, :verify_cert, :logger, :max_redirects, :user_agent].freeze
+  KNOWN_OPTIONS_KEYS = [:timeout, :verify_cert, :logger, :redirect, :max_redirects, :user_agent].freeze
 
-  attr_accessor :timeout, :verify_cert, :logger, :max_redirects, :user_agent
+  attr_accessor *KNOWN_OPTIONS_KEYS
 
   def initialize(options = {})
     Utils.validate_hash_keys options, KNOWN_OPTIONS_KEYS
@@ -11,6 +11,7 @@ class HTTPWrapper
     @timeout       = options.fetch(:timeout) { 10 }
     @verify_cert   = options.fetch(:verify_cert) { true }
     @logger        = options.fetch(:logger) { nil }
+    @redirect      = options.fetch(:redirect) { true }
     @max_redirects = options.fetch(:max_redirects) { 10 }
     @user_agent    = options.fetch(:user_agent) { USER_AGENT }
   end
@@ -50,7 +51,7 @@ class HTTPWrapper
 
     response = execute request.create, request.uri
 
-    if response.kind_of? Net::HTTPRedirection
+    if @redirect && response.kind_of?(Net::HTTPRedirection)
       request.uri = response['location']
       response = get_response request, redirects_limit - 1
     end
